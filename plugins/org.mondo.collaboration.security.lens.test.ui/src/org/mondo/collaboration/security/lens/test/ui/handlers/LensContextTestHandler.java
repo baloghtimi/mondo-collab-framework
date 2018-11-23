@@ -2,9 +2,10 @@ package org.mondo.collaboration.security.lens.test.ui.handlers;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.incquery.runtime.matchers.context.IInputKey;
-import org.eclipse.incquery.runtime.matchers.tuple.FlatTuple;
-import org.eclipse.incquery.runtime.matchers.tuple.Tuple;
+import org.eclipse.viatra.query.runtime.matchers.context.IInputKey;
+import org.eclipse.viatra.query.runtime.matchers.tuple.FlatTuple;
+import org.eclipse.viatra.query.runtime.matchers.tuple.Tuple;
+import org.eclipse.viatra.query.runtime.matchers.tuple.Tuples;
 import org.mondo.collaboration.security.lens.context.MondoLensRuntimeContext;
 import org.mondo.collaboration.security.lens.context.MondoLensScope;
 
@@ -23,7 +24,7 @@ public class LensContextTestHandler extends AbstractLensTestHandler {
 			System.out.println("-----------------");
 			System.out.println("Tuples of key: " + key.getPrettyPrintableName());
 			
-			final FlatTuple nullSeed = new FlatTuple(new Object[key.getArity()]);
+			final Tuple nullSeed = Tuples.staticArityFlatTupleOf(new Object[key.getArity()]);
 			for (Tuple tuple : runtimeContext.enumerateTuples(key, nullSeed)) {
 				System.out.println("\t" + tuple);
 			}

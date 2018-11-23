@@ -5,9 +5,8 @@ import java.net.URL;
 import org.apache.log4j.PropertyConfigurator;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Plugin;
-import org.eclipse.incquery.patternlanguage.PatternLanguageStandaloneSetup;
-import org.eclipse.incquery.patternlanguage.emf.EMFPatternLanguageStandaloneSetup;
-import org.mondo.collaboration.security.macl.xtext.AccessControlLanguageStandaloneSetup;
+import org.eclipse.viatra.query.patternlanguage.emf.EMFPatternLanguageStandaloneSetup;
+import org.mondo.collaboration.policy.RulesStandaloneSetup;
 import org.mondo.collaboration.security.mpbl.xtext.MondoPropertyBasedLockingStandaloneSetup;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -35,9 +34,8 @@ public class LensActivator extends Plugin implements BundleActivator {
 //		URL confURL = getBundle().getEntry("log4j.properties");
 //		PropertyConfigurator.configure(FileLocator.toFileURL(confURL).getFile());
 
-		AccessControlLanguageStandaloneSetup.doSetup();
+		RulesStandaloneSetup.doSetup();
 		MondoPropertyBasedLockingStandaloneSetup.doSetup();
-		PatternLanguageStandaloneSetup.doSetup();
 		EMFPatternLanguageStandaloneSetup.doSetup();
 		
 		LensSessionManager.initializeHttpSessionListener();

@@ -1,8 +1,9 @@
 package org.mondo.collaboration.security.mpbl.server.impl;
 
+import com.google.common.collect.Maps;
+import com.google.common.io.Files;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
@@ -21,8 +22,8 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.eclipse.incquery.patternlanguage.emf.EMFPatternLanguageStandaloneSetup;
-import org.eclipse.incquery.patternlanguage.emf.eMFPatternLanguage.PatternModel;
+import org.eclipse.viatra.query.patternlanguage.emf.EMFPatternLanguageStandaloneSetup;
+import org.eclipse.viatra.query.patternlanguage.emf.vql.PatternModel;
 import org.mondo.collaboration.security.mpbl.server.IPropertyBasedLockingServer;
 import org.mondo.collaboration.security.mpbl.server.LockQueryDTO;
 import org.mondo.collaboration.security.mpbl.server.dto.LockDTO;
@@ -31,9 +32,6 @@ import org.mondo.collaboration.security.mpbl.server.dto.ResponseLockDTO;
 import org.mondo.collaboration.security.mpbl.server.dto.ResponseLockDefinitionQueryDTO;
 import org.mondo.collaboration.security.mpbl.server.dto.ResponseLockQueryDTO;
 import org.mondo.collaboration.security.mpbl.xtext.MondoPropertyBasedLockingStandaloneSetup;
-
-import com.google.common.collect.Maps;
-import com.google.common.io.Files;
 
 public class PropertyBasedLockingServer implements IPropertyBasedLockingServer {
 

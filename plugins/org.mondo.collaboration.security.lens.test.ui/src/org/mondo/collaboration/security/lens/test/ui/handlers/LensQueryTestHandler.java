@@ -23,22 +23,23 @@ import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.incquery.runtime.api.GenericPatternMatch;
-import org.eclipse.incquery.runtime.api.GenericPatternMatcher;
-import org.eclipse.incquery.runtime.api.IncQueryEngine;
-import org.eclipse.incquery.runtime.matchers.psystem.IExpressionEvaluator;
-import org.eclipse.incquery.runtime.matchers.psystem.IValueProvider;
-import org.eclipse.incquery.runtime.matchers.psystem.PBody;
-import org.eclipse.incquery.runtime.matchers.psystem.PVariable;
-import org.eclipse.incquery.runtime.matchers.psystem.basicdeferred.ExportedParameter;
-import org.eclipse.incquery.runtime.matchers.psystem.basicdeferred.ExpressionEvaluation;
-import org.eclipse.incquery.runtime.matchers.psystem.basicdeferred.NegativePatternCall;
-import org.eclipse.incquery.runtime.matchers.psystem.basicenumerables.ConstantValue;
-import org.eclipse.incquery.runtime.matchers.psystem.basicenumerables.TypeConstraint;
-import org.eclipse.incquery.runtime.matchers.psystem.queries.BasePQuery;
-import org.eclipse.incquery.runtime.matchers.psystem.queries.PParameter;
-import org.eclipse.incquery.runtime.matchers.psystem.queries.QueryInitializationException;
-import org.eclipse.incquery.runtime.matchers.tuple.FlatTuple;
+import org.eclipse.viatra.query.runtime.api.GenericPatternMatch;
+import org.eclipse.viatra.query.runtime.api.GenericPatternMatcher;
+import org.eclipse.viatra.query.runtime.api.ViatraQueryEngine;
+import org.eclipse.viatra.query.runtime.matchers.psystem.IExpressionEvaluator;
+import org.eclipse.viatra.query.runtime.matchers.psystem.IValueProvider;
+import org.eclipse.viatra.query.runtime.matchers.psystem.PBody;
+import org.eclipse.viatra.query.runtime.matchers.psystem.PVariable;
+import org.eclipse.viatra.query.runtime.matchers.psystem.basicdeferred.ExportedParameter;
+import org.eclipse.viatra.query.runtime.matchers.psystem.basicdeferred.ExpressionEvaluation;
+import org.eclipse.viatra.query.runtime.matchers.psystem.basicdeferred.NegativePatternCall;
+import org.eclipse.viatra.query.runtime.matchers.psystem.basicenumerables.ConstantValue;
+import org.eclipse.viatra.query.runtime.matchers.psystem.basicenumerables.TypeConstraint;
+import org.eclipse.viatra.query.runtime.matchers.psystem.queries.BasePQuery;
+import org.eclipse.viatra.query.runtime.matchers.psystem.queries.PParameter;
+import org.eclipse.viatra.query.runtime.matchers.psystem.queries.QueryInitializationException;
+import org.eclipse.viatra.query.runtime.matchers.tuple.FlatTuple;
+import org.mondo.collaboration.policy.rules.Role;
 import org.mondo.collaboration.security.lens.arbiter.Asset.ObjectAsset;
 import org.mondo.collaboration.security.lens.arbiter.SecurityArbiter.OperationKind;
 import org.mondo.collaboration.security.lens.context.GenericMondoLensQuerySpecification;
@@ -46,8 +47,6 @@ import org.mondo.collaboration.security.lens.context.MondoLensScope;
 import org.mondo.collaboration.security.lens.context.keys.CollabLensModelInputKey;
 import org.mondo.collaboration.security.lens.context.keys.CorrespondenceKey;
 import org.mondo.collaboration.security.lens.context.keys.SecurityJudgementKey;
-import org.mondo.collaboration.security.macl.xtext.rule.mACLRule.Role;
-import org.mondo.collaboration.security.macl.xtext.rule.mACLRule.RuleType;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -62,7 +61,7 @@ public class LensQueryTestHandler extends AbstractLensTestHandler {
 	protected void doTest(MondoLensScope scope, IFile policyFile, IFile goldFile, IFile frontFile,
 			Resource policyResource, Resource goldResource, Resource frontResource) throws Exception 
 	{
-		IncQueryEngine engine = IncQueryEngine.on(scope);
+		ViatraQueryEngine engine = ViatraQueryEngine.on(scope);
 		printMatchSet(engine.getMatcher(Q_MAPPED_RESOURCE));
 		printMatchSet(engine.getMatcher(Q_OBJECT_PERMITTED));
 		printMatchSet(engine.getMatcher(Q_GET_OBJECT_MAPPED));
@@ -115,7 +114,7 @@ public class LensQueryTestHandler extends AbstractLensTestHandler {
 						));
 				PVariable var_judgement = body.getOrCreateVariableByName("judgement");
 				
-				new TypeConstraint(body, new FlatTuple(var_object, var_role, var_judgement), 
+				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_object, var_role, var_judgement), 
 						new SecurityJudgementKey(OperationKind.READ, ObjectAsset.class));
 				
 				new ConstantValue(body, var_judgement, RuleType.PERMIT);
@@ -157,9 +156,9 @@ public class LensQueryTestHandler extends AbstractLensTestHandler {
 						));
 				PVariable var_relativeURI = body.getOrCreateVariableByName("relativeURI");
 				
-				new TypeConstraint(body, new FlatTuple(var_goldResource, var_relativeURI), 
+				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_goldResource, var_relativeURI), 
 						new CollabLensModelInputKey(RESOURCE_KEY, GOLD));
-				new TypeConstraint(body, new FlatTuple(var_frontResource, var_relativeURI), 
+				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_frontResource, var_relativeURI), 
                         new CollabLensModelInputKey(RESOURCE_KEY, FRONT));
 			}
 			return bodies;
@@ -202,14 +201,14 @@ public class LensQueryTestHandler extends AbstractLensTestHandler {
 //				PVariable var_role = body.getOrCreateVariableByName("role");
 //				PVariable var_judgement = body.getOrCreateVariableByName("judgement");
 			
-				new TypeConstraint(body, new FlatTuple(var_gold, var_eClass), 
+				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_gold, var_eClass), 
 				        new CollabLensModelInputKey(EOBJECT_KEY, GOLD));
-				new TypeConstraint(body, new FlatTuple(var_front, var_eClass), 
+				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_front, var_eClass), 
 				        new CollabLensModelInputKey(EOBJECT_KEY, FRONT));
-				new TypeConstraint(body, new FlatTuple(var_gold, var_front), 
+				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_gold, var_front), 
 						CorrespondenceKey.EOBJECT);
 				
-//				new TypeConstraint(body, new FlatTuple(var_gold, var_role, var_judgement), 
+//				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_gold, var_role, var_judgement), 
 //						new SecurityJudgementKey(OperationKind.READ, ObjectAsset.class));
 //				new ConstantValue(body, var_judgement, RuleType.PERMIT);
 //				new ExpressionEvaluation(body, new IExpressionEvaluator() {
@@ -267,14 +266,14 @@ public class LensQueryTestHandler extends AbstractLensTestHandler {
 //				PVariable var_role = body.getOrCreateVariableByName("role");
 //				PVariable var_judgement = body.getOrCreateVariableByName("judgement");
 			
-				new TypeConstraint(body, new FlatTuple(var_gold, var_eClass), 
+				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_gold, var_eClass), 
 				        new CollabLensModelInputKey(EOBJECT_KEY, GOLD));
-//				new TypeConstraint(body, new FlatTuple(var_front, var_eClass), 
+//				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_front, var_eClass), 
 //						EObjectKey.FRONT);
-//				new TypeConstraint(body, new FlatTuple(var_gold, var_front), 
+//				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_gold, var_front), 
 //						CorrespondenceKey.EOBJECT);
 				
-//				new TypeConstraint(body, new FlatTuple(var_gold, var_role, var_judgement), 
+//				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_gold, var_role, var_judgement), 
 //						new SecurityJudgementKey(OperationKind.READ, ObjectAsset.class));
 //				new ConstantValue(body, var_judgement, RuleType.PERMIT);
 //				new ExpressionEvaluation(body, new IExpressionEvaluator() {
@@ -294,7 +293,7 @@ public class LensQueryTestHandler extends AbstractLensTestHandler {
 //					}
 //				}, null);
 				
-				new NegativePatternCall(body, new FlatTuple(var_gold, var_front, var_eClass), 
+				new NegativePatternCall(body, Tuples.staticArityFlatTupleOf(var_gold, var_front, var_eClass), 
 						Q_PUTBACK_OBJECT_MAPPED.getInternalQueryRepresentation());
 			}
 			return bodies;
@@ -335,14 +334,14 @@ public class LensQueryTestHandler extends AbstractLensTestHandler {
 //				PVariable var_role = body.getOrCreateVariableByName("role");
 //				PVariable var_judgement = body.getOrCreateVariableByName("judgement");
 			
-//				new TypeConstraint(body, new FlatTuple(var_gold, var_eClass), 
+//				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_gold, var_eClass), 
 //						EObjectKey.GOLD);
-				new TypeConstraint(body, new FlatTuple(var_front, var_eClass), 
+				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_front, var_eClass), 
 				        new CollabLensModelInputKey(EOBJECT_KEY, FRONT));
-//				new TypeConstraint(body, new FlatTuple(var_gold, var_front), 
+//				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_gold, var_front), 
 //						CorrespondenceKey.EOBJECT);
 				
-//				new TypeConstraint(body, new FlatTuple(var_gold, var_role, var_judgement), 
+//				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_gold, var_role, var_judgement), 
 //						new SecurityJudgementKey(OperationKind.READ, ObjectAsset.class));
 //				new ConstantValue(body, var_judgement, RuleType.PERMIT);
 //				new ExpressionEvaluation(body, new IExpressionEvaluator() {
@@ -362,7 +361,7 @@ public class LensQueryTestHandler extends AbstractLensTestHandler {
 //					}
 //				}, null);
 				
-				new NegativePatternCall(body, new FlatTuple(var_gold, var_front, var_eClass), 
+				new NegativePatternCall(body, Tuples.staticArityFlatTupleOf(var_gold, var_front, var_eClass), 
 						Q_PUTBACK_OBJECT_MAPPED.getInternalQueryRepresentation());
 			}
 			return bodies;
@@ -406,14 +405,14 @@ public class LensQueryTestHandler extends AbstractLensTestHandler {
 				PVariable var_role = body.getOrCreateVariableByName("role");
 				PVariable var_judgement = body.getOrCreateVariableByName("judgement");
 			
-				new TypeConstraint(body, new FlatTuple(var_gold, var_eClass), 
+				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_gold, var_eClass), 
 				        new CollabLensModelInputKey(EOBJECT_KEY, GOLD));
-				new TypeConstraint(body, new FlatTuple(var_front, var_eClass), 
+				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_front, var_eClass), 
 				        new CollabLensModelInputKey(EOBJECT_KEY, FRONT));
-				new TypeConstraint(body, new FlatTuple(var_gold, var_front), 
+				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_gold, var_front), 
 						CorrespondenceKey.EOBJECT);
 				
-				new TypeConstraint(body, new FlatTuple(var_gold, var_role, var_judgement), 
+				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_gold, var_role, var_judgement), 
 						new SecurityJudgementKey(OperationKind.READ, ObjectAsset.class));
 				new ConstantValue(body, var_judgement, RuleType.PERMIT);
 				new ExpressionEvaluation(body, new IExpressionEvaluator() {
@@ -471,14 +470,14 @@ public class LensQueryTestHandler extends AbstractLensTestHandler {
 				PVariable var_role = body.getOrCreateVariableByName("role");
 				PVariable var_judgement = body.getOrCreateVariableByName("judgement");
 			
-				new TypeConstraint(body, new FlatTuple(var_gold, var_eClass), 
+				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_gold, var_eClass), 
 				        new CollabLensModelInputKey(EOBJECT_KEY, GOLD));
-//				new TypeConstraint(body, new FlatTuple(var_front, var_eClass), 
+//				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_front, var_eClass), 
 //						EObjectKey.FRONT);
-//				new TypeConstraint(body, new FlatTuple(var_gold, var_front), 
+//				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_gold, var_front), 
 //						CorrespondenceKey.EOBJECT);
 				
-				new TypeConstraint(body, new FlatTuple(var_gold, var_role, var_judgement), 
+				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_gold, var_role, var_judgement), 
 						new SecurityJudgementKey(OperationKind.READ, ObjectAsset.class));
 				new ConstantValue(body, var_judgement, RuleType.PERMIT);
 				new ExpressionEvaluation(body, new IExpressionEvaluator() {
@@ -498,7 +497,7 @@ public class LensQueryTestHandler extends AbstractLensTestHandler {
 					}
 				}, null);
 				
-				new NegativePatternCall(body, new FlatTuple(var_gold, var_front, var_eClass), 
+				new NegativePatternCall(body, Tuples.staticArityFlatTupleOf(var_gold, var_front, var_eClass), 
 						Q_GET_OBJECT_MAPPED.getInternalQueryRepresentation());
 			}
 			return bodies;
@@ -539,14 +538,14 @@ public class LensQueryTestHandler extends AbstractLensTestHandler {
 //				PVariable var_role = body.getOrCreateVariableByName("role");
 //				PVariable var_judgement = body.getOrCreateVariableByName("judgement");
 			
-//				new TypeConstraint(body, new FlatTuple(var_gold, var_eClass), 
+//				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_gold, var_eClass), 
 //						EObjectKey.GOLD);
-				new TypeConstraint(body, new FlatTuple(var_front, var_eClass), 
+				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_front, var_eClass), 
 				        new CollabLensModelInputKey(EOBJECT_KEY, FRONT));
-//				new TypeConstraint(body, new FlatTuple(var_gold, var_front), 
+//				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_gold, var_front), 
 //						CorrespondenceKey.EOBJECT);
 				
-//				new TypeConstraint(body, new FlatTuple(var_gold, var_role, var_judgement), 
+//				new TypeConstraint(body, Tuples.staticArityFlatTupleOf(var_gold, var_role, var_judgement), 
 //						new SecurityJudgementKey(OperationKind.READ, ObjectAsset.class));
 //				new ConstantValue(body, var_judgement, RuleType.PERMIT);
 //				new ExpressionEvaluation(body, new IExpressionEvaluator() {
@@ -566,7 +565,7 @@ public class LensQueryTestHandler extends AbstractLensTestHandler {
 //					}
 //				}, null);
 				
-				new NegativePatternCall(body, new FlatTuple(var_gold, var_front, var_eClass), 
+				new NegativePatternCall(body, Tuples.staticArityFlatTupleOf(var_gold, var_front, var_eClass), 
 						Q_GET_OBJECT_MAPPED.getInternalQueryRepresentation());
 			}
 			return bodies;

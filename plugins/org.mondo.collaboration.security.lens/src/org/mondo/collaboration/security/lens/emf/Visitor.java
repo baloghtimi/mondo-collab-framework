@@ -16,9 +16,10 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
-import org.eclipse.incquery.runtime.base.comprehension.EMFVisitor;
-import org.eclipse.incquery.runtime.matchers.tuple.FlatTuple;
-import org.eclipse.incquery.runtime.matchers.tuple.Tuple;
+import org.eclipse.viatra.query.runtime.base.comprehension.EMFVisitor;
+import org.eclipse.viatra.query.runtime.matchers.tuple.FlatTuple;
+import org.eclipse.viatra.query.runtime.matchers.tuple.Tuple;
+import org.eclipse.viatra.query.runtime.matchers.tuple.Tuples;
 import org.mondo.collaboration.security.lens.util.LiveTable;
 
 class Visitor extends EMFVisitor {
@@ -49,7 +50,7 @@ class Visitor extends EMFVisitor {
 	
 	@Override
 	public void visitElement(EObject source) {
-		Tuple t = new FlatTuple(source, source.eClass());
+		Tuple t = Tuples.staticArityFlatTupleOf(source, source.eClass());
 		updateIndex(modelIndexer.indexedEObjects, t);
 	}
 	
@@ -57,7 +58,7 @@ class Visitor extends EMFVisitor {
 	public void visitResource(Resource resource) {
 //		if (resource != modelIndexer.dummyResource)
 //		{
-			Tuple t = new FlatTuple(resource, modelIndexer.uriRelativiser.uriToRelativePath(resource.getURI()));
+			Tuple t = Tuples.staticArityFlatTupleOf(resource, modelIndexer.uriRelativiser.uriToRelativePath(resource.getURI()));
 			updateIndex(modelIndexer.indexedResources, t);
 //		}
 	}
@@ -66,7 +67,7 @@ class Visitor extends EMFVisitor {
 	public void visitTopElementInResource(Resource resource, EObject element) {
 		if (element != null /*&& resource != modelIndexer.dummyResource*/)
 		{
-			Tuple t = new FlatTuple(resource, element);
+			Tuple t = Tuples.staticArityFlatTupleOf(resource, element);
 			updateIndex(modelIndexer.indexedResourceRootContents, t);
 		}
 	}
@@ -102,7 +103,7 @@ class Visitor extends EMFVisitor {
 				!feature.isDerived() && 
 				(isNotification || source.eIsSet(feature))
 		) {
-			Tuple t = new FlatTuple(source, feature, target);
+			Tuple t = Tuples.staticArityFlatTupleOf(source, feature, target);
 			updateIndex(index, t);
 		}
 	}

@@ -2,10 +2,10 @@ package org.mondo.collaboration.security.mpbl.client.ui.util;
 
 import java.util.Collection;
 
-import org.eclipse.incquery.patternlanguage.patternLanguage.Pattern;
-import org.eclipse.incquery.patternlanguage.patternLanguage.Variable;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.viatra.query.patternlanguage.emf.vql.Pattern;
+import org.eclipse.viatra.query.patternlanguage.emf.vql.Variable;
 
 import com.google.common.collect.Lists;
 

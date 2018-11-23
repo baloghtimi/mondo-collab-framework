@@ -13,15 +13,17 @@ package org.mondo.collaboration.security.lens.correspondence;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.incquery.runtime.matchers.tuple.FlatTuple;
+import org.eclipse.viatra.query.runtime.matchers.tuple.FlatTuple;
+import org.eclipse.viatra.query.runtime.matchers.tuple.Tuple;
+import org.eclipse.viatra.query.runtime.matchers.tuple.Tuples;
 import org.mondo.collaboration.security.lens.context.keys.CorrespondenceKey;
 import org.mondo.collaboration.security.lens.context.manipulables.DebuggableManipulableWrapper;
 import org.mondo.collaboration.security.lens.emf.ModelIndexer;
@@ -127,7 +129,7 @@ public class EObjectCorrespondence {
 			Collection<EObject> fronts = frontIndex.get(goldKey);
 			if (fronts != null) {
 				checkIndexBucket("FRONT", goldKey, fronts);
-				FlatTuple tuple = new FlatTuple(
+				Tuple tuple = Tuples.staticArityFlatTupleOf(
 						golds.iterator().next(),
 						fronts.iterator().next());
 				manipulable.assertTuple(tuple);

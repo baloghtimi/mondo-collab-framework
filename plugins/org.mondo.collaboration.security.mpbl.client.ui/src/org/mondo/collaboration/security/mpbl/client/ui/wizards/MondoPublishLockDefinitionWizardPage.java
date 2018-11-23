@@ -1,9 +1,5 @@
 package org.mondo.collaboration.security.mpbl.client.ui.wizards;
 
-import org.eclipse.incquery.patternlanguage.emf.eMFPatternLanguage.ClassType;
-import org.eclipse.incquery.patternlanguage.emf.eMFPatternLanguage.PatternModel;
-import org.eclipse.incquery.patternlanguage.patternLanguage.Pattern;
-import org.eclipse.incquery.patternlanguage.patternLanguage.Variable;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -20,6 +16,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.viatra.query.patternlanguage.emf.vql.ClassType;
+import org.eclipse.viatra.query.patternlanguage.emf.vql.Parameter;
+import org.eclipse.viatra.query.patternlanguage.emf.vql.Pattern;
+import org.eclipse.viatra.query.patternlanguage.emf.vql.PatternModel;
+import org.eclipse.viatra.query.patternlanguage.emf.vql.Variable;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.ui.editor.model.IXtextDocument;
 import org.eclipse.xtext.util.concurrent.IUnitOfWork;
@@ -148,9 +149,8 @@ public class MondoPublishLockDefinitionWizardPage extends WizardPage {
                 Pattern pattern = (Pattern) element;
                 return pattern.eContainer();
             }
-            if (element instanceof Variable) {
-                Variable variable = (Variable) element;
-                return variable.getReferences().get(0);
+            if (element instanceof Parameter) {
+                return ((Parameter) element).eContainer();
 
             }
             return null;

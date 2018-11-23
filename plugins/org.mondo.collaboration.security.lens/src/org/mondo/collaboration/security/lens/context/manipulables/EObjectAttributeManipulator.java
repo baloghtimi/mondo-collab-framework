@@ -15,9 +15,10 @@ import java.util.Collection;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.incquery.runtime.matchers.context.IInputKey;
-import org.eclipse.incquery.runtime.matchers.tuple.FlatTuple;
-import org.eclipse.incquery.runtime.matchers.tuple.Tuple;
+import org.eclipse.viatra.query.runtime.matchers.context.IInputKey;
+import org.eclipse.viatra.query.runtime.matchers.tuple.FlatTuple;
+import org.eclipse.viatra.query.runtime.matchers.tuple.Tuple;
+import org.eclipse.viatra.query.runtime.matchers.tuple.Tuples;
 import org.mondo.collaboration.security.lens.emf.ModelFactInputKey;
 import org.mondo.collaboration.security.lens.emf.ModelIndexer;
 
@@ -63,7 +64,7 @@ public class EObjectAttributeManipulator extends BaseEMFManipulable {
 				return;
 			}
 		}
-		throw new UnsupportedOperationException(new FlatTuple(element, feature, value).toString());
+		throw new UnsupportedOperationException(Tuples.staticArityFlatTupleOf(element, feature, value).toString());
 	}
 
 	@Override

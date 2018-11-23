@@ -11,75 +11,66 @@
 
 package org.mondo.collaboration.security.lens.context;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Callable;
+import java.util.Collection;
 
-import org.eclipse.incquery.runtime.matchers.context.IInputKey;
-import org.eclipse.incquery.runtime.matchers.tuple.Tuple;
-import org.mondo.collaboration.security.lens.util.ILiveRelation;
-import org.mondo.collaboration.security.lens.util.LiveTableBasedRuntimeContext;
+import org.eclipse.viatra.query.runtime.matchers.scopes.SimpleRuntimeContext;
+import org.eclipse.viatra.query.runtime.matchers.scopes.tables.IIndexTable;
 
 /**
  * @author Bergmann Gabor
  *
  */
-public class MondoLensRuntimeContext extends LiveTableBasedRuntimeContext {
+public class MondoLensRuntimeContext extends SimpleRuntimeContext {
 
 	private MondoLensEngineContext engineContext;
 
-	private MondoLensRuntimeContext(MondoLensEngineContext engineContext, Map<IInputKey, ? extends ILiveRelation> aggregatedTables) {
-		super(MondoLensMetaContext.INSTANCE, aggregatedTables);
+	private MondoLensRuntimeContext(MondoLensEngineContext engineContext, Collection<? extends IIndexTable> aggregatedTables) {
+		super(MondoLensMetaContext.INSTANCE);
 		this.engineContext = engineContext;
+		
+		for (IIndexTable table : aggregatedTables) {
+			this.registerIndexTable(table);
+		}
 	}
 	
 	public static MondoLensRuntimeContext create(MondoLensEngineContext engineContext, MondoLensScope scope) {
-		return new MondoLensRuntimeContext(engineContext, scope.getQueriables());
+		return new MondoLensRuntimeContext(engineContext, scope.getQueriables().values());
 	}
 
-	@Override
-	public <V> V coalesceTraversals(Callable<V> callable) throws InvocationTargetException {
-		return engineContext.getBaseIndexInternal().coalesceTraversals(callable);
-	}
-
-	@Override
-	public boolean isCoalescing() {
-		return false;
-	}
-
-	@Override
-	public boolean isIndexed(IInputKey key) {
-		return true;
-	}
-
-	@Override
-	public void ensureIndexed(IInputKey key) {
-	}
-
-	@Override
-	public Object wrapElement(Object externalElement) {
-		return externalElement;
-	}
-
-	@Override
-	public Object unwrapElement(Object internalElement) {
-		return internalElement;
-	}
-
-	@Override
-	public Tuple wrapTuple(Tuple externalElements) {
-		return externalElements;
-	}
-
-	@Override
-	public Tuple unwrapTuple(Tuple internalElements) {
-		return internalElements;
-	}
-
-
-	public Set<IInputKey> getInputKeys() {
-		return this.aggregatedTables.keySet();
-	}
+//	@Override
+//	public <V> V coalesceTraversals(Callable<V> callable) throws InvocationTargetException {
+//		return engineContext.getBaseIndexInternal().coalesceTraversals(callable);
+//	}
+//
+//	@Override
+//	public boolean isCoalescing() {
+//		return false;
+//	}
+//
+//
+//	@Override
+//	public Object wrapElement(Object externalElement) {
+//		return externalElement;
+//	}
+//
+//	@Override
+//	public Object unwrapElement(Object internalElement) {
+//		return internalElement;
+//	}
+//
+//	@Override
+//	public Tuple wrapTuple(Tuple externalElements) {
+//		return externalElements;
+//	}
+//
+//	@Override
+//	public Tuple unwrapTuple(Tuple internalElements) {
+//		return internalElements;
+//	}
+//
+//
+//	public Set<IInputKey> getInputKeys() {
+//		return this.aggregatedTables.keySet();
+//	}
 	
 }

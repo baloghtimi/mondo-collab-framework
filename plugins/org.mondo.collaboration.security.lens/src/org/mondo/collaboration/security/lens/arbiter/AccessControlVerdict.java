@@ -14,10 +14,6 @@ package org.mondo.collaboration.security.lens.arbiter;
 import java.util.Map;
 
 import org.mondo.collaboration.security.lens.arbiter.SecurityArbiter.OperationKind;
-import org.mondo.collaboration.security.macl.xtext.rule.mACLRule.Rule;
-import org.mondo.collaboration.security.macl.xtext.rule.mACLRule.RuleConstraint;
-import org.mondo.collaboration.security.macl.xtext.rule.mACLRule.RuleRights;
-import org.mondo.collaboration.security.macl.xtext.rule.mACLRule.RuleType;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;

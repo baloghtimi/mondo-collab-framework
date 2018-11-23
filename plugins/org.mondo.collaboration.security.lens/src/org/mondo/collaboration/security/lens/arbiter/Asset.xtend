@@ -17,13 +17,14 @@ import java.util.Set
 import org.eclipse.emf.ecore.EAttribute
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
-import org.eclipse.incquery.runtime.api.IPatternMatch
-import org.eclipse.incquery.runtime.api.IQuerySpecification
-import org.eclipse.incquery.runtime.matchers.psystem.annotations.PAnnotation
-import org.eclipse.incquery.runtime.matchers.psystem.annotations.ParameterReference
-import org.eclipse.incquery.runtime.matchers.tuple.FlatTuple
-import org.eclipse.incquery.runtime.matchers.tuple.Tuple
 import org.eclipse.xtend.lib.annotations.Data
+import org.eclipse.viatra.query.runtime.matchers.tuple.Tuple
+import org.eclipse.viatra.query.runtime.matchers.tuple.FlatTuple
+import org.eclipse.viatra.query.runtime.api.IPatternMatch
+import org.eclipse.viatra.query.runtime.api.IQuerySpecification
+import org.eclipse.viatra.query.runtime.matchers.psystem.annotations.ParameterReference
+import org.eclipse.viatra.query.runtime.matchers.psystem.annotations.PAnnotation
+import org.eclipse.viatra.query.runtime.matchers.tuple.Tuples
 
 /**
  * An asset represents something that policy rules can permit/deny access to.
@@ -37,7 +38,7 @@ abstract class Asset {
 		EObject object
 		
 		override toTuple() {
-			new FlatTuple(object)
+			Tuples.staticArityFlatTupleOf(object)
 		}
 		def static Factory factory(int objectPos) {
 			[#{new ObjectAsset(get(objectPos) as EObject)}] 
@@ -49,7 +50,7 @@ abstract class Asset {
 		EObject target
 		
 		override toTuple() {
-			new FlatTuple(source, reference, target)
+			Tuples.staticArityFlatTupleOf(source, reference, target)
 		}
 		def static Factory factory(int sourcePos, EReference reference, int targetPos) {
 			val opposite = reference.EOpposite
@@ -84,7 +85,7 @@ abstract class Asset {
 		EAttribute attribute
 		
 		override toTuple() {
-			new FlatTuple(source, attribute)
+			Tuples.staticArityFlatTupleOf(source, attribute)
 		}	
 		def static Factory factory(int sourcePos, EAttribute attribute) {
 			[#{new AttributeAsset(get(sourcePos) as EObject, attribute)}] 
@@ -118,7 +119,7 @@ abstract class Asset {
    		if (refAnnotation != null) {
 			val srcPos = getParameterIndexFromAnnotationValue(refAnnotation, "src", query) 
 			val trgPos = getParameterIndexFromAnnotationValue(refAnnotation, "trg", query) 
-			val featureName = refAnnotation.getFirstValue("feature") as String
+			val featureName = refAnnotation.getFirstValue("feature").get as String
 			// TODO attempt to statically resolve EStructuralFeature instead for better performance?
 			return ReferenceAsset.factory(srcPos, featureName, trgPos)  					
    		}
@@ -126,7 +127,7 @@ abstract class Asset {
    		val attrAnnotation = query.allAnnotations.findFirst[name == "SecurityAttribute"]
    		if (attrAnnotation != null) {
 			val srcPos = getParameterIndexFromAnnotationValue(attrAnnotation, "src", query) 
-			val featureName = attrAnnotation.getFirstValue("feature") as String
+			val featureName = attrAnnotation.getFirstValue("feature").get as String
 			// TODO attempt to statically resolve EStructuralFeature instead for better performance?
 			return AttributeAsset.factory(srcPos, featureName)  					
    		}
@@ -147,7 +148,7 @@ abstract class Asset {
    	}
 				
 	private def static getParameterIndexFromAnnotationValue(PAnnotation annotation, String annotationValueName, IQuerySpecification<?> query) {
-		val annotationValue = annotation.getFirstValue(annotationValueName)
+		val annotationValue = annotation.getFirstValue(annotationValueName).get
 		val paramName = switch annotationValue {
 			ParameterReference : annotationValue.name
 			String: annotationValue

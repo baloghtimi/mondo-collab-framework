@@ -31,12 +31,15 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
-import org.eclipse.incquery.runtime.base.api.BaseIndexOptions;
-import org.eclipse.incquery.runtime.emf.EMFScope;
-import org.eclipse.incquery.runtime.exception.IncQueryException;
-import org.eclipse.incquery.runtime.matchers.tuple.FlatTuple;
-import org.eclipse.incquery.runtime.matchers.tuple.Tuple;
 import org.eclipse.viatra.modelobfuscator.api.DataTypeObfuscator;
+import org.eclipse.viatra.query.runtime.base.api.BaseIndexOptions;
+import org.eclipse.viatra.query.runtime.emf.EMFScope;
+import org.eclipse.viatra.query.runtime.exception.ViatraQueryException;
+import org.eclipse.viatra.query.runtime.matchers.tuple.FlatTuple;
+import org.eclipse.viatra.query.runtime.matchers.tuple.Tuple;
+import org.eclipse.viatra.query.runtime.matchers.tuple.Tuples;
+import org.mondo.collaboration.policy.rules.AccessControlModel;
+import org.mondo.collaboration.policy.rules.User;
 import org.mondo.collaboration.security.lens.arbiter.LockArbiter;
 import org.mondo.collaboration.security.lens.arbiter.SecurityArbiter;
 import org.mondo.collaboration.security.lens.bx.AbortReason.DenialReason;
@@ -50,8 +53,6 @@ import org.mondo.collaboration.security.lens.correspondence.EObjectCorrespondenc
 import org.mondo.collaboration.security.lens.emf.ModelIndexer;
 import org.mondo.collaboration.security.lens.util.ILiveRelation.Listener;
 import org.mondo.collaboration.security.lens.util.LiveTable;
-import org.mondo.collaboration.security.macl.xtext.mondoAccessControlLanguage.AccessControlModel;
-import org.mondo.collaboration.security.macl.xtext.rule.mACLRule.User;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -118,7 +119,7 @@ public class OnlineCollaborationSession {
 	 * @throws IncQueryException 
 	 */
 	public OnlineCollaborationSession(URI goldConfinementURI, ResourceSet goldResourceSet,
-			UniqueIDSchemeFactory uniqueIDFactory, Resource policyResource, Resource lockResource, String ownerUsername, String ownerPassword) throws IncQueryException {
+			UniqueIDSchemeFactory uniqueIDFactory, Resource policyResource, Resource lockResource, String ownerUsername, String ownerPassword) throws ViatraQueryException {
 		super();
 		this.goldConfinementURI = goldConfinementURI;
 		this.goldResourceSet = goldResourceSet;
@@ -173,7 +174,7 @@ public class OnlineCollaborationSession {
 	 * @param lockResource the resource of the new lock model, can be null if no locks used
 	 * @throws IncQueryException
 	 */
-	public void reinitializeWith(Resource policyResource, Resource lockResource) throws IncQueryException {
+	public void reinitializeWith(Resource policyResource, Resource lockResource) throws ViatraQueryException {
 		this.policyResource = policyResource;
 		this.lockResource = lockResource;
 		
@@ -321,7 +322,7 @@ public class OnlineCollaborationSession {
 			}
 			
 			uniqueIdentifiers = Sets.newHashSet();
-			correspondenceTable.addListener(new FlatTuple(null, null), new Listener() {
+			correspondenceTable.addListener(Tuples.staticArityFlatTupleOf(null, null), new Listener() {
 				
 				@Override
 				public void accept(Tuple t, Boolean addition) {

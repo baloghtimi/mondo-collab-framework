@@ -15,11 +15,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.eclipse.incquery.runtime.api.IncQueryEngine;
-import org.eclipse.incquery.runtime.api.scope.IEngineContext;
-import org.eclipse.incquery.runtime.api.scope.IIndexingErrorListener;
-import org.eclipse.incquery.runtime.api.scope.IncQueryScope;
-import org.eclipse.incquery.runtime.matchers.context.IInputKey;
+import org.eclipse.viatra.query.runtime.api.ViatraQueryEngine;
+import org.eclipse.viatra.query.runtime.api.scope.IEngineContext;
+import org.eclipse.viatra.query.runtime.api.scope.IIndexingErrorListener;
+import org.eclipse.viatra.query.runtime.api.scope.QueryScope;
+import org.eclipse.viatra.query.runtime.emf.EMFScope;
+import org.eclipse.viatra.query.runtime.matchers.context.IInputKey;
+import org.eclipse.viatra.query.runtime.matchers.scopes.tables.IIndexTable;
 import org.mondo.collaboration.security.lens.arbiter.Asset;
 import org.mondo.collaboration.security.lens.arbiter.LockArbiter;
 import org.mondo.collaboration.security.lens.arbiter.SecurityArbiter;
@@ -49,16 +51,16 @@ import org.mondo.collaboration.security.lens.util.LiveTable;
  * @author Bergmann Gabor
  *
  */
-public class MondoLensScope extends IncQueryScope {
+public class MondoLensScope extends QueryScope {
 	
 	private SecurityArbiter arbiter;
 	private LockArbiter lockArbiter;
 	private ModelIndexer goldIndexer;
 	private ModelIndexer frontIndexer;
-	private Map<CorrespondenceKey, LiveTable> correspondenceTables;
+	private Map<CorrespondenceKey, IIndexTable> correspondenceTables;
 
 
-	public MondoLensScope(SecurityArbiter arbiter, LockArbiter lockArbiter, ModelIndexer goldIndexer, ModelIndexer frontIndexer, Map<CorrespondenceKey, LiveTable> correspondenceTables) {
+	public MondoLensScope(SecurityArbiter arbiter, LockArbiter lockArbiter, ModelIndexer goldIndexer, ModelIndexer frontIndexer, Map<CorrespondenceKey, IIndexTable> correspondenceTables) {
 		this.arbiter = arbiter;
 		this.lockArbiter = lockArbiter;
 		this.goldIndexer = goldIndexer;
@@ -68,7 +70,7 @@ public class MondoLensScope extends IncQueryScope {
 	
 
 	@Override
-	protected IEngineContext createEngineContext(IncQueryEngine engine, IIndexingErrorListener errorListener, org.apache.log4j.Logger logger) {
+	protected IEngineContext createEngineContext(ViatraQueryEngine engine, IIndexingErrorListener errorListener, org.apache.log4j.Logger logger) {
 		return new MondoLensEngineContext(this, engine, errorListener, logger);
 	}
 
@@ -138,13 +140,13 @@ public class MondoLensScope extends IncQueryScope {
 
 	
 
-	public Map<CorrespondenceKey, LiveTable> getCorrespondenceTables() {
+	public Map<CorrespondenceKey, IIndexTable> getCorrespondenceTables() {
 		return correspondenceTables;
 	}
 	
 	
-	private Map<IInputKey, ? extends ILiveRelation> queriables;
-	public Map<IInputKey, ? extends ILiveRelation> getQueriables() {
+	private Map<IInputKey, ? extends IIndexTable> queriables;
+	public Map<IInputKey, ? extends IIndexTable> getQueriables() {
 		if (queriables == null) {
 			queriables = 
 					createQueriables(getArbiter(), getGoldIndexer(), getFrontIndexer(), getCorrespondenceTables());
@@ -160,11 +162,11 @@ public class MondoLensScope extends IncQueryScope {
 		return manipulables;
 	}
 	
-	private Map<IInputKey, ? extends ILiveRelation> createQueriables(SecurityArbiter arbiter,
+	private Map<IInputKey, ? extends IIndexTable> createQueriables(SecurityArbiter arbiter,
 			ModelIndexer goldIndexer, ModelIndexer frontIndexer,
-			Map<CorrespondenceKey, LiveTable> correspondenceTables) 
+			Map<CorrespondenceKey, IIndexTable> correspondenceTables) 
 	{
-		Map<IInputKey, ILiveRelation> liveRelations = new HashMap<IInputKey, ILiveRelation>();
+		Map<IInputKey, IIndexTable> liveRelations = new HashMap<IInputKey, IIndexTable>();
 		
 		liveRelations.putAll(correspondenceTables);
 		
@@ -177,7 +179,7 @@ public class MondoLensScope extends IncQueryScope {
 		
 		for (Class<? extends Asset> assetClass : Asset.getKinds()) {
 			for (OperationKind op : OperationKind.values()) {
-				ILiveRelation liveRelation = arbiter.getResultsAsLiveRelation(op, assetClass);
+				IIndexTable liveRelation = arbiter.getResultsAsLiveRelation(op, assetClass);
 				final SecurityJudgementKey key = new SecurityJudgementKey(op, assetClass);
 				liveRelations.put(key, liveRelation);
 			}

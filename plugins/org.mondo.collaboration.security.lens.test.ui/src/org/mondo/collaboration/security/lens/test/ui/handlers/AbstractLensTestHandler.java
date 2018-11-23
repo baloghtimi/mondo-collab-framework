@@ -27,12 +27,15 @@ import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.incquery.runtime.api.IPatternMatch;
-import org.eclipse.incquery.runtime.api.IncQueryMatcher;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.viatra.query.runtime.api.IPatternMatch;
+import org.eclipse.viatra.query.runtime.api.ViatraQueryMatcher;
 import org.eclipse.xtext.ui.resource.IResourceSetProvider;
+import org.mondo.collaboration.policy.rules.AccessControlModel;
+import org.mondo.collaboration.policy.rules.Role;
+import org.mondo.collaboration.policy.rules.User;
 import org.mondo.collaboration.security.lens.arbiter.LockArbiter;
 import org.mondo.collaboration.security.lens.arbiter.SecurityArbiter;
 import org.mondo.collaboration.security.lens.bx.RelationalLensXform;
@@ -42,9 +45,6 @@ import org.mondo.collaboration.security.lens.correspondence.DefaultEMFUniqueIDFu
 import org.mondo.collaboration.security.lens.correspondence.EObjectCorrespondence;
 import org.mondo.collaboration.security.lens.emf.ModelIndexer;
 import org.mondo.collaboration.security.lens.util.LiveTable;
-import org.mondo.collaboration.security.macl.xtext.mondoAccessControlLanguage.AccessControlModel;
-import org.mondo.collaboration.security.macl.xtext.rule.mACLRule.Role;
-import org.mondo.collaboration.security.macl.xtext.rule.mACLRule.User;
 
 import com.google.inject.Injector;
 
@@ -133,7 +133,7 @@ public abstract class AbstractLensTestHandler extends AbstractHandler {
 	    return resourceSet.getResource(fileURI, true);
 	}
 
-	protected void printMatchSet(IncQueryMatcher<? extends IPatternMatch> matcher) {
+	protected void printMatchSet(ViatraQueryMatcher<? extends IPatternMatch> matcher) {
 		System.out.println("-----------------");
 		System.out.println("Matches of query: " + matcher.getPatternName());
 		for (IPatternMatch match : matcher.getAllMatches()) {

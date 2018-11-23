@@ -19,7 +19,7 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.edit.domain.AdapterFactoryEditingDomain;
 import org.eclipse.equinox.http.servlet.HttpServiceServlet;
-import org.eclipse.incquery.runtime.exception.IncQueryException;
+import org.eclipse.viatra.query.runtime.exception.ViatraQueryException;
 import org.mondo.collaboration.security.lens.bx.online.OnlineCollaborationSession;
 import org.mondo.collaboration.security.lens.correspondence.EObjectCorrespondence;
 import org.osgi.framework.BundleContext;
@@ -192,7 +192,7 @@ public class LensSessionManager {
 			NotifierManager.notifySuccess(EVENT_WHITEBOARD_SESSION_OPENED, goldURI);
 			logger.info("Lens created");
 			return onlineCollaborationSession;
-		} catch (IncQueryException | CoreException e) {
+		} catch (ViatraQueryException | CoreException e) {
 			logger.error("Error during online session initialization", e);
 		}
 		return null;

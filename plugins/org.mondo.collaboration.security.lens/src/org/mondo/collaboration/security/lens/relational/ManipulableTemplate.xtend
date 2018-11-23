@@ -10,12 +10,14 @@
  *******************************************************************************/
 
 package org.mondo.collaboration.security.lens.relational
-import org.eclipse.xtend.lib.annotations.Data
-import org.eclipse.incquery.runtime.matchers.context.IInputKey
+
 import java.util.List
-import org.eclipse.incquery.runtime.matchers.psystem.basicenumerables.TypeConstraint
-import org.eclipse.incquery.runtime.matchers.tuple.FlatTuple
-import org.eclipse.incquery.runtime.matchers.psystem.PBody
+import org.eclipse.viatra.query.runtime.matchers.context.IInputKey
+import org.eclipse.viatra.query.runtime.matchers.psystem.PBody
+import org.eclipse.viatra.query.runtime.matchers.psystem.basicenumerables.TypeConstraint
+import org.eclipse.viatra.query.runtime.matchers.tuple.FlatTuple
+import org.eclipse.xtend.lib.annotations.Data
+import org.eclipse.viatra.query.runtime.matchers.tuple.Tuples
 
 /**
  * A tuple of variables associated with a manipulable base relation;
@@ -32,7 +34,7 @@ public class ManipulableTemplate extends QueryTemplate {
 		
 		override apply(PBody body) {
 			val Object[] valueArray = argumentVariables.map[body.getOrCreateVariableByName(it)]
-			new TypeConstraint(body, new FlatTuple(valueArray), key)
+			new TypeConstraint(body, Tuples.staticArityFlatTupleOf(valueArray), key)
 		}
 		
 		def ActionStep asRetractAction() {

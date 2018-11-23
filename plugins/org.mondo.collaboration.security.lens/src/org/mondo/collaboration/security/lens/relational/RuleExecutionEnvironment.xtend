@@ -11,14 +11,15 @@
 
 package org.mondo.collaboration.security.lens.relational
 
-import java.util.Map
-import org.eclipse.xtend.lib.annotations.Data
-import org.eclipse.incquery.runtime.matchers.context.IInputKey
-import org.eclipse.incquery.runtime.matchers.tuple.Tuple
 import java.util.List
-import org.eclipse.incquery.runtime.matchers.tuple.FlatTuple
+import java.util.Map
+import org.eclipse.viatra.query.runtime.matchers.context.IInputKey
+import org.eclipse.viatra.query.runtime.matchers.tuple.FlatTuple
+import org.eclipse.viatra.query.runtime.matchers.tuple.Tuple
+import org.eclipse.xtend.lib.annotations.Data
 import org.mondo.collaboration.security.lens.bx.LensTransformationExecution
 import org.mondo.collaboration.security.lens.bx.LensTransformationExecution.UndoableManipulationAction
+import org.eclipse.viatra.query.runtime.matchers.tuple.Tuples
 
 /**
  * The runtime execution context of a transformation rule
@@ -48,7 +49,7 @@ class RuleExecutionEnvironment {
 		val manipulable = transformationExecution.transformation.getManipulable(key)
 		
 		val Object[] seedValueArray = argumentVariableNames.map[variables.get(it)]
-		val seedTuple = new FlatTuple(seedValueArray)
+		val seedTuple = Tuples.staticArityFlatTupleOf(seedValueArray)
 		
 		// do the actual manipulation
 		val finalTuple = if (isInsertion) manipulable.assertTuple(seedTuple) else manipulable.retractTuple(seedTuple)

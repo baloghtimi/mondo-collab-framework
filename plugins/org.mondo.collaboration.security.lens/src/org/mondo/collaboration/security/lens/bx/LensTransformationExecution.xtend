@@ -13,12 +13,12 @@ package org.mondo.collaboration.security.lens.bx
 
 import java.util.ArrayDeque
 import org.apache.log4j.Logger
-import org.eclipse.incquery.runtime.matchers.context.IInputKey
-import org.eclipse.incquery.runtime.matchers.tuple.Tuple
 import org.eclipse.xtend.lib.annotations.Accessors
 import org.eclipse.xtend.lib.annotations.Data
 import org.mondo.collaboration.security.lens.bx.AbortReason.DenialReason
 import org.mondo.collaboration.security.lens.bx.AbortReason.RuntimeExceptionAbort
+import org.eclipse.viatra.query.runtime.matchers.context.IInputKey
+import org.eclipse.viatra.query.runtime.matchers.tuple.Tuple
 
 /**
  * Tracks a single get / putback execution 

@@ -13,8 +13,9 @@ package org.mondo.collaboration.security.lens.context;
 
 import java.util.List;
 
-import org.eclipse.incquery.runtime.matchers.psystem.queries.BasePQuery;
-import org.eclipse.incquery.runtime.matchers.psystem.queries.PParameter;
+import org.eclipse.viatra.query.runtime.matchers.psystem.queries.BasePQuery;
+import org.eclipse.viatra.query.runtime.matchers.psystem.queries.PParameter;
+import org.eclipse.viatra.query.runtime.matchers.psystem.queries.PVisibility;
 
 /**
  * Generic PQuery useful for lens queries
@@ -26,7 +27,7 @@ public abstract class BaseMondoLensPQuery extends BasePQuery {
 	private final List<PParameter> parameters;
 
 	public BaseMondoLensPQuery(String fullyQualifiedName, List<PParameter> parameters) {
-		super();
+		super(PVisibility.PUBLIC);
 		this.fullyQualifiedName = fullyQualifiedName;
 		this.parameters = parameters;
 	}
