@@ -15,9 +15,9 @@ import com.google.common.collect.ImmutableMap
 import java.util.Map
 import java.util.Set
 import org.eclipse.viatra.query.runtime.matchers.context.IInputKey
+import org.eclipse.viatra.query.runtime.matchers.scopes.tables.IIndexTable
 import org.eclipse.viatra.transformation.evm.api.RuleSpecification
 import org.eclipse.viatra.transformation.evm.specific.resolver.FixedPriorityConflictResolver
-import org.mondo.collaboration.security.lens.util.ILiveRelation
 import org.mondo.collaboration.security.lens.util.IManipulableRelation
 
 /**
@@ -31,10 +31,10 @@ public abstract class RelationalTransformationSpecification {
 	protected Set<RelationalRuleSpecification> rules = newHashSet()
 	
 	private final Map<IInputKey, IManipulableRelation> manipulables;
-	private final Map<IInputKey, ILiveRelation> queriables;
+	private final Map<IInputKey, IIndexTable> queriables;
 	protected final FixedPriorityConflictResolver priorityResolver = new FixedPriorityConflictResolver;
 	
-	public new (Map<IInputKey, ? extends IManipulableRelation> manipulables, Map<IInputKey, ? extends ILiveRelation> queriables) {
+	public new (Map<IInputKey, ? extends IManipulableRelation> manipulables, Map<IInputKey, ? extends IIndexTable> queriables) {
 		this.manipulables = ImmutableMap.copyOf(manipulables)
 		this.queriables = ImmutableMap.copyOf(queriables)
 	}
@@ -47,7 +47,7 @@ public abstract class RelationalTransformationSpecification {
 	/**
 	 * Queryable base relations.
 	 */
-	def ILiveRelation getQueriable(IInputKey key) {queriables.get(key)}
+	def IIndexTable getQueriable(IInputKey key) {queriables.get(key)}
 	
 	/**
 	 * Assigns priority to rule specification.

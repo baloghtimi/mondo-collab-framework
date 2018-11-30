@@ -11,14 +11,17 @@
 
 package org.mondo.collaboration.security.lens.context;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.viatra.query.runtime.matchers.context.AbstractQueryMetaContext;
 import org.eclipse.viatra.query.runtime.matchers.context.IInputKey;
+import org.eclipse.viatra.query.runtime.matchers.context.InputKeyImplication;
 import org.mondo.collaboration.security.lens.context.keys.CollabLensModelInputKey;
 import org.mondo.collaboration.security.lens.context.keys.CorrespondenceKey;
 import org.mondo.collaboration.security.lens.emf.ModelFactInputKey;
-import org.mondo.collaboration.security.lens.util.DefaultMetaContext;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -27,7 +30,7 @@ import com.google.common.collect.ImmutableSet;
  * @author Bergmann Gabor
  *
  */
-public class MondoLensMetaContext extends DefaultMetaContext {
+public class MondoLensMetaContext extends AbstractQueryMetaContext {
     public static MondoLensMetaContext INSTANCE = new MondoLensMetaContext();
 	
     private static final ImmutableMap<Set<Integer>, Set<Integer>> ONE_TO_ONE = ImmutableMap.<Set<Integer>, Set<Integer>>of(
@@ -54,7 +57,19 @@ public class MondoLensMetaContext extends DefaultMetaContext {
 		    }
 		}
 		    
-		return super.getFunctionalDependencies(key);
+        return Collections.emptyMap();
 	}
+    @Override
+    public boolean isEnumerable(IInputKey key) {
+        return key.isEnumerable();
+    }
+    @Override
+    public boolean isStateless(IInputKey key) {
+        return !key.isEnumerable();
+    }
+    @Override
+    public Collection<InputKeyImplication> getImplications(IInputKey implyingKey) {
+        return Collections.emptySet();
+    }
 
 }

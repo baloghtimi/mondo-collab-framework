@@ -21,13 +21,14 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.viatra.query.runtime.matchers.tuple.FlatTuple;
+import org.eclipse.viatra.query.runtime.matchers.scopes.tables.ITableWriterBinary;
 import org.eclipse.viatra.query.runtime.matchers.tuple.Tuple;
 import org.eclipse.viatra.query.runtime.matchers.tuple.Tuples;
+import org.eclipse.viatra.query.runtime.matchers.util.Direction;
 import org.mondo.collaboration.security.lens.context.keys.CorrespondenceKey;
 import org.mondo.collaboration.security.lens.context.manipulables.DebuggableManipulableWrapper;
 import org.mondo.collaboration.security.lens.emf.ModelIndexer;
-import org.mondo.collaboration.security.lens.util.LiveTable;
+import org.mondo.collaboration.security.lens.util.IManipulableRelation;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Multimaps;
@@ -114,12 +115,23 @@ public class EObjectCorrespondence {
 	/**
 	 * Builds a correspondence table between two models based on unique identifiers.
 	 */
-	public static LiveTable buildEObjectCorrespondenceTable(
+	public static void buildEObjectCorrespondenceTable(
 			Map<Object, Collection<EObject>> goldIndex,
-			Map<Object, Collection<EObject>> frontIndex)
+			Map<Object, Collection<EObject>> frontIndex,
+			ITableWriterBinary.Table<EObject, EObject> table)
 	{
-		final LiveTable table = new LiveTable();
-		DebuggableManipulableWrapper manipulable = new DebuggableManipulableWrapper(table, CorrespondenceKey.EOBJECT);
+		DebuggableManipulableWrapper manipulable = new DebuggableManipulableWrapper(new IManipulableRelation() {
+            @Override
+            public Tuple retractTuple(Tuple seed) {
+                throw new UnsupportedOperationException();
+            }
+            
+            @Override
+            public Tuple assertTuple(Tuple seed) {
+                table.write(Direction.INSERT, (EObject)seed.get(0), (EObject)seed.get(1));
+                return seed;
+            }
+        }, CorrespondenceKey.EOBJECT);
 
 		for (Entry<Object, Collection<EObject>> goldEntry : goldIndex.entrySet()) {
 			final Collection<EObject> golds = goldEntry.getValue();
@@ -135,8 +147,6 @@ public class EObjectCorrespondence {
 				manipulable.assertTuple(tuple);
 			}
 		}
-
-		return table;
 	}
 
 	static void checkIndexBucket(final String modelName, final Object indexKey, final Collection<EObject> indexValues) {

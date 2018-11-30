@@ -19,6 +19,7 @@ import java.util.Set;
 import org.eclipse.emf.common.notify.Notifier;
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.resource.Resource;
@@ -27,10 +28,14 @@ import org.eclipse.viatra.query.runtime.base.api.BaseIndexOptions;
 import org.eclipse.viatra.query.runtime.base.api.IndexingLevel;
 import org.eclipse.viatra.query.runtime.base.api.NavigationHelper;
 import org.eclipse.viatra.query.runtime.base.comprehension.EMFModelComprehension;
+import org.eclipse.viatra.query.runtime.matchers.scopes.tables.DefaultIndexTable;
+import org.eclipse.viatra.query.runtime.matchers.scopes.tables.IIndexTable;
+import org.eclipse.viatra.query.runtime.matchers.scopes.tables.ITableContext;
+import org.eclipse.viatra.query.runtime.matchers.scopes.tables.ITableWriterBinary;
+import org.eclipse.viatra.query.runtime.matchers.scopes.tables.SimpleBinaryTable;
 import org.eclipse.viatra.query.runtime.matchers.tuple.Tuple;
+import org.eclipse.viatra.query.runtime.matchers.tuple.TupleMask;
 import org.eclipse.viatra.query.runtime.matchers.tuple.Tuples;
-import org.mondo.collaboration.security.lens.util.ILiveRelation;
-import org.mondo.collaboration.security.lens.util.LiveTable;
 import org.mondo.collaboration.security.lens.util.uri.URIRelativiser;
 
 import com.google.common.collect.ImmutableMap;
@@ -53,20 +58,37 @@ public class ModelIndexer {
 	URIRelativiser uriRelativiser;
 	Set<EObject> unrootedObjects = new HashSet<>();
 	
-	LiveTable indexedResources = new LiveTable();
-	LiveTable indexedResourceRootContents = new LiveTable(); 
-	LiveTable indexedEObjects = new LiveTable(); 
-	LiveTable indexedEObjectReferences = new LiveTable(); 
-	LiveTable indexedEObjectAttributes = new LiveTable();
+    ITableContext tableContext = new ITableContext() {
+        
+        @Override
+        public void logError(String message) {
+            System.err.println(message);
+        }
+    };
+
 	
-	Map<ModelFactInputKey, LiveTable> liveIndexTables = Maps.immutableEnumMap(ImmutableMap.of(
+	
+    ITableWriterBinary.Table<Resource, String> indexedResources = 
+            new SimpleBinaryTable<>(ModelFactInputKey.RESOURCE_KEY, tableContext, true);
+    ITableWriterBinary.Table<Resource, EObject>  indexedResourceRootContents = 
+            new SimpleBinaryTable<>(ModelFactInputKey.RESOURCE_ROOT_CONTENTS_KEY, tableContext, true);
+    ITableWriterBinary.Table<EObject, EClass>  indexedEObjects = 
+            new SimpleBinaryTable<>(ModelFactInputKey.EOBJECT_KEY, tableContext, true); 
+    DefaultIndexTable indexedEObjectReferences = 
+	        new DefaultIndexTable(ModelFactInputKey.REFERENCE_KEY, tableContext, false);
+	DefaultIndexTable indexedEObjectAttributes = 
+            new DefaultIndexTable(ModelFactInputKey.ATTRIBUTE_KEY, tableContext, false);
+	
+	Map<ModelFactInputKey, IIndexTable> liveIndexTables = Maps.immutableEnumMap(ImmutableMap.of(
 	        ModelFactInputKey.ATTRIBUTE_KEY,                  indexedEObjectAttributes,
             ModelFactInputKey.EOBJECT_KEY,                    indexedEObjects,
             ModelFactInputKey.REFERENCE_KEY,                  indexedEObjectReferences,
             ModelFactInputKey.RESOURCE_KEY,                   indexedResources,
             ModelFactInputKey.RESOURCE_ROOT_CONTENTS_KEY,     indexedResourceRootContents
 	));
-	Map<ModelFactInputKey, ILiveRelation> liveIndexRelations = ImmutableMap.copyOf(liveIndexTables);
+	Map<ModelFactInputKey, IIndexTable> liveIndexRelations = ImmutableMap.copyOf(liveIndexTables);
+	
+	
 	
 	public ModelIndexer(URI baseURI, ResourceSet root, NavigationHelper daisyChainedIndexer) {
 		super();
@@ -105,10 +127,10 @@ public class ModelIndexer {
 //		return dummyResource;
 //	}
 	
-	public Map<ModelFactInputKey, LiveTable> getLiveIndexTables() {
+	public Map<ModelFactInputKey, IIndexTable> getLiveIndexTables() {
         return liveIndexTables;
     }
-    public Map<ModelFactInputKey, ILiveRelation> getLiveIndexRelations() {
+    public Map<ModelFactInputKey, IIndexTable> getLiveIndexRelations() {
         return liveIndexRelations;
     }
 
@@ -117,13 +139,15 @@ public class ModelIndexer {
     EMFAdapter adapter;
 
 	
-	
+    private static final TupleMask NONE_OF_TWO =    TupleMask.empty(2);
+    private static final TupleMask NONE_OF_THREE =  TupleMask.empty(3);
+    
 	public Iterable<EObject> getAllEObjects() {
 		Collection<EObject> objects = new HashSet<>();
-		for (Tuple tuple : indexedEObjects.getTuplesForSeed(Tuples.staticArityFlatTupleOf(null, null))) {
+		for (Tuple tuple : indexedEObjects.enumerateTuples(NONE_OF_TWO, Tuples.staticArityFlatTupleOf())) {
 			objects.add((EObject) tuple.get(0));
 		}
-		for (Tuple tuple : indexedEObjectReferences.getTuplesForSeed(Tuples.staticArityFlatTupleOf(null, null, null))) {
+		for (Tuple tuple : indexedEObjectReferences.enumerateTuples(NONE_OF_THREE, Tuples.staticArityFlatTupleOf())) {
 			objects.add((EObject) tuple.get(2));
 		}
 		return objects;

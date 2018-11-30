@@ -12,13 +12,8 @@
 package org.mondo.collaboration.security.lens.bx.offline;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
 
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.viatra.modelobfuscator.api.DataTypeObfuscator;
@@ -32,12 +27,11 @@ import org.mondo.collaboration.security.lens.arbiter.SecurityArbiter;
 import org.mondo.collaboration.security.lens.bx.AbortReason.DenialReason;
 import org.mondo.collaboration.security.lens.bx.LensTransformationExecution;
 import org.mondo.collaboration.security.lens.bx.RelationalLensXform;
+import org.mondo.collaboration.security.lens.context.MondoLensHost;
 import org.mondo.collaboration.security.lens.context.MondoLensScope;
-import org.mondo.collaboration.security.lens.context.keys.CorrespondenceKey;
 import org.mondo.collaboration.security.lens.correspondence.EObjectCorrespondence;
 import org.mondo.collaboration.security.lens.correspondence.EObjectCorrespondence.UniqueIDSchemeFactory;
 import org.mondo.collaboration.security.lens.emf.ModelIndexer;
-import org.mondo.collaboration.security.lens.util.LiveTable;
 import org.mondo.collaboration.security.mpbl.xtext.mondoPropertyBasedLocking.PropertyBasedLockingModel;
 
 import com.google.common.collect.ImmutableMap;
@@ -120,19 +114,11 @@ public class OfflineCollaborationSession {
         		frontConfinementURI,
         		frontResourceSet);
         
-		Map<Object, Collection<EObject>> goldIndex = EObjectCorrespondence.applyObjectToUniqueIdentifier(goldIndexer, uniqueIDFactory.apply(goldConfinementURI));
-		Map<Object, Collection<EObject>> frontIndex = EObjectCorrespondence.applyObjectToUniqueIdentifier(frontIndexer, uniqueIDFactory.apply(frontConfinementURI));
-		
-        
-		LiveTable correspondenceTable = EObjectCorrespondence.buildEObjectCorrespondenceTable(goldIndex,frontIndex);
-        Map<CorrespondenceKey, LiveTable> correspondenceTables = new EnumMap<CorrespondenceKey, LiveTable>(CorrespondenceKey.class);
-        
-        correspondenceTables.put(CorrespondenceKey.EOBJECT, correspondenceTable);
-        //correspondenceTables.put(CorrespondenceKey.RESOURCE, new LiveTable());
-        
-		MondoLensScope scope = new MondoLensScope(arbiter, lockArbiter, goldIndexer, frontIndexer, correspondenceTables);
-		
-		return new RelationalLensXform(scope, user, stringObfuscator);
+		MondoLensHost lensHost = new MondoLensHost(arbiter, lockArbiter, goldIndexer, frontIndexer, 
+		        uniqueIDFactory.apply(goldConfinementURI), uniqueIDFactory.apply(frontConfinementURI), 
+		        true);
+				
+		return new RelationalLensXform(lensHost, user, stringObfuscator);
 	}
 	
 	

@@ -54,6 +54,8 @@ import static org.mondo.collaboration.security.lens.context.keys.WhichModel.*
 import static org.mondo.collaboration.security.lens.emf.ModelFactInputKey.*
 import org.eclipse.viatra.query.runtime.api.AdvancedViatraQueryEngine
 import org.eclipse.viatra.query.runtime.matchers.tuple.Tuples
+import org.mondo.collaboration.security.lens.context.MondoLensHost
+import org.eclipse.viatra.query.runtime.api.scope.QueryScope
 
 /**
  * The lens (bidirectional asymmetric view-update mapping) between a gold model and a front model, 
@@ -68,20 +70,22 @@ public class RelationalLensXform extends RelationalTransformationSpecification {
 	
 	
 	@Accessors(PUBLIC_GETTER) User user
-	@Accessors(PUBLIC_GETTER) MondoLensScope scope
+    @Accessors(PUBLIC_GETTER) MondoLensHost lensHost
+    @Accessors(PUBLIC_GETTER) QueryScope scope
 	@Accessors(PUBLIC_GETTER) DataTypeObfuscator<String> stringObfuscator
 
 	@Accessors(PUBLIC_GETTER) AuthorizationQueries authorizationQueries
 	AdvancedViatraQueryEngine engine
 	
-	new(MondoLensScope scope, User user, DataTypeObfuscator<String> stringObfuscator) {
-		super(scope.manipulables, scope.queriables)
+	new(MondoLensHost lensHost, User user, DataTypeObfuscator<String> stringObfuscator) {
+		super(lensHost.manipulables, lensHost.queriables)
 		this.user = user
-		this.scope = scope
+		this.lensHost = lensHost
+		this.scope = lensHost.scope
 		this.stringObfuscator = stringObfuscator
 		
 		this.engine = AdvancedViatraQueryEngine.createUnmanagedEngine(scope)
-		this.authorizationQueries = scope.arbiter.instantiateAuthorizationQuerySpecificationsForUser(user)
+		this.authorizationQueries = lensHost.arbiter.instantiateAuthorizationQuerySpecificationsForUser(user)
 
 		addRules
 		operationalize
@@ -108,7 +112,7 @@ public class RelationalLensXform extends RelationalTransformationSpecification {
 	public def doPutback(boolean rollbackGoldIfDenied) {
 		val trExec = new LensTransformationExecution(this, '''PUTBACK.«nextTransformationSequenceID++»''')
 		
-		val LockArbiter.LockMonitoringSession lockSession =	scope.lockArbiter.openSession(user.name)
+		val LockArbiter.LockMonitoringSession lockSession =	lensHost.lockArbiter.openSession(user.name)
 		try {
 			fireAllRules(getRuleEngineForPutback, trExec)		
 			

@@ -13,10 +13,8 @@ package org.mondo.collaboration.security.lens.bx.online;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -32,10 +30,13 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.viatra.modelobfuscator.api.DataTypeObfuscator;
+import org.eclipse.viatra.query.runtime.api.scope.QueryScope;
 import org.eclipse.viatra.query.runtime.base.api.BaseIndexOptions;
 import org.eclipse.viatra.query.runtime.emf.EMFScope;
 import org.eclipse.viatra.query.runtime.exception.ViatraQueryException;
-import org.eclipse.viatra.query.runtime.matchers.tuple.FlatTuple;
+import org.eclipse.viatra.query.runtime.matchers.context.IInputKey;
+import org.eclipse.viatra.query.runtime.matchers.context.IQueryRuntimeContextListener;
+import org.eclipse.viatra.query.runtime.matchers.scopes.tables.IIndexTable;
 import org.eclipse.viatra.query.runtime.matchers.tuple.Tuple;
 import org.eclipse.viatra.query.runtime.matchers.tuple.Tuples;
 import org.mondo.collaboration.policy.rules.AccessControlModel;
@@ -45,14 +46,10 @@ import org.mondo.collaboration.security.lens.arbiter.SecurityArbiter;
 import org.mondo.collaboration.security.lens.bx.AbortReason.DenialReason;
 import org.mondo.collaboration.security.lens.bx.LensTransformationExecution;
 import org.mondo.collaboration.security.lens.bx.RelationalLensXform;
-import org.mondo.collaboration.security.lens.context.MondoLensScope;
-import org.mondo.collaboration.security.lens.context.keys.CorrespondenceKey;
-import org.mondo.collaboration.security.lens.correspondence.EObjectCorrespondence;
+import org.mondo.collaboration.security.lens.context.MondoLensHost;
 import org.mondo.collaboration.security.lens.correspondence.EObjectCorrespondence.UniqueIDScheme;
 import org.mondo.collaboration.security.lens.correspondence.EObjectCorrespondence.UniqueIDSchemeFactory;
 import org.mondo.collaboration.security.lens.emf.ModelIndexer;
-import org.mondo.collaboration.security.lens.util.ILiveRelation.Listener;
-import org.mondo.collaboration.security.lens.util.LiveTable;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -232,15 +229,15 @@ public class OnlineCollaborationSession {
 		private final URI frontConfinementURI;
 		private final ResourceSet frontResourceSet;
 		
-		private MondoLensScope scope;
+        private QueryScope scope;
+        private MondoLensHost lensHost;
 		private RelationalLensXform lens;
-		private Map<CorrespondenceKey, LiveTable> correspondenceTables;
+		private IIndexTable correspondenceTable;
 		
 		private Set<Object> uniqueIdentifiers;
 		private ModelIndexer frontIndexer;
 		private UniqueIDScheme goldObjectToUniqueIdentifier;
 		private UniqueIDScheme frontObjectToUniqueIdentifier;
-		private LiveTable correspondenceTable;
 
 		/**
 		 * Creates an in-memory front model for the user and immediately synchronizes the gold model onto it.
@@ -292,7 +289,7 @@ public class OnlineCollaborationSession {
 			if (user == null)
 				throw new IllegalArgumentException(String.format("User of name %s not found in MACL resource %s", userName, getPolicyResource().getURI()));
 			
-			lens = new RelationalLensXform(scope, user, stringObfuscator);
+			lens = new RelationalLensXform(lensHost, user, stringObfuscator);
 			
 			if (startWithGet) {
 			    overWriteFromGold();
@@ -313,43 +310,44 @@ public class OnlineCollaborationSession {
 			goldObjectToUniqueIdentifier = uniqueIDFactory.apply(goldConfinementURI);
 			frontObjectToUniqueIdentifier = uniqueIDFactory.apply(frontConfinementURI);
 			
-			if (startWithGet) {
-				correspondenceTable = new LiveTable();
-			}	else {
-				Map<Object, Collection<EObject>> goldIndex = EObjectCorrespondence.applyObjectToUniqueIdentifier(goldIndexer, goldObjectToUniqueIdentifier);
-				Map<Object, Collection<EObject>> frontIndex = EObjectCorrespondence.applyObjectToUniqueIdentifier(frontIndexer, frontObjectToUniqueIdentifier);
-				correspondenceTable = EObjectCorrespondence.buildEObjectCorrespondenceTable(goldIndex, frontIndex);
-			}
+//			if (startWithGet) {
+//				correspondenceTable = new LiveTable();
+//			}	else {
+//				Map<Object, Collection<EObject>> goldIndex = EObjectCorrespondence.applyObjectToUniqueIdentifier(goldIndexer, goldObjectToUniqueIdentifier);
+//				Map<Object, Collection<EObject>> frontIndex = EObjectCorrespondence.applyObjectToUniqueIdentifier(frontIndexer, frontObjectToUniqueIdentifier);
+//				correspondenceTable = EObjectCorrespondence.buildEObjectCorrespondenceTable(goldIndex, frontIndex);
+//			}
 			
-			uniqueIdentifiers = Sets.newHashSet();
-			correspondenceTable.addListener(Tuples.staticArityFlatTupleOf(null, null), new Listener() {
-				
-				@Override
-				public void accept(Tuple t, Boolean addition) {
-					if(addition) {
-						Object goldId = goldObjectToUniqueIdentifier.apply((EObject)t.get(0));
-						Object frontId = frontObjectToUniqueIdentifier.apply((EObject)t.get(1));
-						if(goldId != null)
-							uniqueIdentifiers.add(goldId);
-						if(frontId != null)
-							uniqueIdentifiers.add(frontId);
-					}
-					else {
-						Object goldId = goldObjectToUniqueIdentifier.apply((EObject)t.get(0));
-						Object frontId = frontObjectToUniqueIdentifier.apply((EObject)t.get(1));
-						if(goldId != null)
-							uniqueIdentifiers.remove(goldId);
-						if(frontId != null)
-							uniqueIdentifiers.remove(frontId);
-						}
-				}
-			});
-			
-			
-			correspondenceTables = new EnumMap<CorrespondenceKey, LiveTable>(CorrespondenceKey.class);
-	        correspondenceTables.put(CorrespondenceKey.EOBJECT, correspondenceTable);
 	        
-			scope = new MondoLensScope(arbiter, lockArbiter, goldIndexer, frontIndexer, correspondenceTables);
+	        lensHost = new MondoLensHost(arbiter, lockArbiter, goldIndexer, frontIndexer, 
+	                goldObjectToUniqueIdentifier, frontObjectToUniqueIdentifier, 
+	                !startWithGet);
+			
+			scope = lensHost.getScope();
+			
+            uniqueIdentifiers = Sets.newHashSet();
+            correspondenceTable.addUpdateListener(Tuples.staticArityFlatTupleOf(null, null), new IQueryRuntimeContextListener() {
+                
+                @Override
+                public void update(IInputKey key, Tuple updateTuple, boolean isInsertion) {
+                    if(isInsertion) {
+                        Object goldId = goldObjectToUniqueIdentifier.apply((EObject)updateTuple.get(0));
+                        Object frontId = frontObjectToUniqueIdentifier.apply((EObject)updateTuple.get(1));
+                        if(goldId != null)
+                            uniqueIdentifiers.add(goldId);
+                        if(frontId != null)
+                            uniqueIdentifiers.add(frontId);
+                    }
+                    else {
+                        Object goldId = goldObjectToUniqueIdentifier.apply((EObject)updateTuple.get(0));
+                        Object frontId = frontObjectToUniqueIdentifier.apply((EObject)updateTuple.get(1));
+                        if(goldId != null)
+                            uniqueIdentifiers.remove(goldId);
+                        if(frontId != null)
+                            uniqueIdentifiers.remove(frontId);
+                        }
+                }
+            });
 		}
 		
 		/**
@@ -453,7 +451,7 @@ public class OnlineCollaborationSession {
 			return frontResourceSet;
 		}
 
-		public MondoLensScope getScope() {
+		public QueryScope getScope() {
 			return scope;
 		}
 
@@ -465,9 +463,6 @@ public class OnlineCollaborationSession {
 			return frontObjectToUniqueIdentifier;
 		}
 		
-		public Map<CorrespondenceKey, LiveTable> getCorrespondenceTables() {
-			return correspondenceTables;
-		}
 		public Set<Object> getUniqueIdentifiers() {
 			return ImmutableSet.copyOf(uniqueIdentifiers);
 		}

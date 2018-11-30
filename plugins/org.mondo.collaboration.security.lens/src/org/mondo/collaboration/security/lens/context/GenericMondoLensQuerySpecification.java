@@ -14,7 +14,7 @@ package org.mondo.collaboration.security.lens.context;
 import org.eclipse.viatra.query.runtime.api.GenericPatternMatcher;
 import org.eclipse.viatra.query.runtime.api.GenericQuerySpecification;
 import org.eclipse.viatra.query.runtime.api.ViatraQueryEngine;
-import org.eclipse.viatra.query.runtime.emf.EMFScope;
+import org.eclipse.viatra.query.runtime.api.scope.QueryScope;
 import org.eclipse.viatra.query.runtime.exception.ViatraQueryException;
 import org.eclipse.viatra.query.runtime.matchers.psystem.queries.PQuery;
 
@@ -33,7 +33,7 @@ public class GenericMondoLensQuerySpecification extends GenericQuerySpecificatio
 	}
 
 	@Override
-	public Class<? extends EMFScope> getPreferredScopeClass() {
+	public Class<? extends  QueryScope> getPreferredScopeClass() {
 		return MondoLensScope.class;
 	}
 

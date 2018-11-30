@@ -17,15 +17,17 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.viatra.query.runtime.base.comprehension.EMFVisitor;
-import org.eclipse.viatra.query.runtime.matchers.tuple.FlatTuple;
+import org.eclipse.viatra.query.runtime.matchers.scopes.tables.DefaultIndexTable;
+import org.eclipse.viatra.query.runtime.matchers.scopes.tables.ITableWriterBinary;
 import org.eclipse.viatra.query.runtime.matchers.tuple.Tuple;
 import org.eclipse.viatra.query.runtime.matchers.tuple.Tuples;
-import org.mondo.collaboration.security.lens.util.LiveTable;
+import org.eclipse.viatra.query.runtime.matchers.util.Direction;
 
 class Visitor extends EMFVisitor {
 
 	private final ModelIndexer modelIndexer;
 	private final boolean isInsertion;
+	private final Direction direction;
 	private final boolean isNotification;
 
 	public Visitor(ModelIndexer modelIndexer, boolean isInsertion, boolean isNotification) {
@@ -33,6 +35,8 @@ class Visitor extends EMFVisitor {
 		this.modelIndexer = modelIndexer;
 		this.isInsertion = isInsertion;
 		this.isNotification = isNotification;
+		
+		this.direction = isInsertion ? Direction.INSERT : Direction.DELETE;
 	}
 	
 	@Override
@@ -44,14 +48,15 @@ class Visitor extends EMFVisitor {
 		return false;
 	}
 	
-	public boolean avoidTransientContainmentLink(EObject source, EReference reference, EObject targetObject) {
+	@Override
+    public boolean avoidTransientContainmentLink(EObject source, EReference reference, EObject targetObject) {
 	    return (!isNotification) && targetObject.eAdapters().contains(modelIndexer.adapter); 
     }
 	
 	@Override
 	public void visitElement(EObject source) {
 		Tuple t = Tuples.staticArityFlatTupleOf(source, source.eClass());
-		updateIndex(modelIndexer.indexedEObjects, t);
+		updateIndex2(modelIndexer.indexedEObjects, t);
 	}
 	
 	@Override
@@ -59,7 +64,7 @@ class Visitor extends EMFVisitor {
 //		if (resource != modelIndexer.dummyResource)
 //		{
 			Tuple t = Tuples.staticArityFlatTupleOf(resource, modelIndexer.uriRelativiser.uriToRelativePath(resource.getURI()));
-			updateIndex(modelIndexer.indexedResources, t);
+			updateIndex2(modelIndexer.indexedResources, t);
 //		}
 	}
 	
@@ -68,7 +73,7 @@ class Visitor extends EMFVisitor {
 		if (element != null /*&& resource != modelIndexer.dummyResource*/)
 		{
 			Tuple t = Tuples.staticArityFlatTupleOf(resource, element);
-			updateIndex(modelIndexer.indexedResourceRootContents, t);
+			updateIndex2(modelIndexer.indexedResourceRootContents, t);
 		}
 	}
 
@@ -95,7 +100,7 @@ class Visitor extends EMFVisitor {
 		else if (feature instanceof EReference)
 			updateFeature(modelIndexer.indexedEObjectReferences, source, feature, target);
 	}
-	private void updateFeature(LiveTable index, EObject source, EStructuralFeature feature, Object target) {
+	private void updateFeature(DefaultIndexTable index, EObject source, EStructuralFeature feature, Object target) {
 		if (
 				target!=null && 
 				!target.equals(feature.getDefaultValue()) && 
@@ -104,10 +109,10 @@ class Visitor extends EMFVisitor {
 				(isNotification || source.eIsSet(feature))
 		) {
 			Tuple t = Tuples.staticArityFlatTupleOf(source, feature, target);
-			updateIndex(index, t);
+			index.write(direction, t);
 		}
 	}
-	private void updateIndex(final LiveTable index, Tuple t) {
-		index.updateTuple(t, isInsertion);
+	private <X,Y> void updateIndex2(final ITableWriterBinary<X,Y> index, Tuple t) {
+		index.write(direction, (X) t.get(0), (Y) t.get(1));
 	}
 }

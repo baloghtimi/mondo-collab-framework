@@ -11,68 +11,36 @@
 
 package org.mondo.collaboration.security.lens.context;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.eclipse.viatra.query.runtime.api.ViatraQueryEngine;
-import org.eclipse.viatra.query.runtime.api.scope.IEngineContext;
-import org.eclipse.viatra.query.runtime.api.scope.IIndexingErrorListener;
 import org.eclipse.viatra.query.runtime.api.scope.QueryScope;
-import org.eclipse.viatra.query.runtime.emf.EMFScope;
-import org.eclipse.viatra.query.runtime.matchers.context.IInputKey;
-import org.eclipse.viatra.query.runtime.matchers.scopes.tables.IIndexTable;
-import org.mondo.collaboration.security.lens.arbiter.Asset;
-import org.mondo.collaboration.security.lens.arbiter.LockArbiter;
-import org.mondo.collaboration.security.lens.arbiter.SecurityArbiter;
-import org.mondo.collaboration.security.lens.arbiter.SecurityArbiter.OperationKind;
-import org.mondo.collaboration.security.lens.context.keys.CollabLensModelInputKey;
-import org.mondo.collaboration.security.lens.context.keys.CorrespondenceKey;
-import org.mondo.collaboration.security.lens.context.keys.SecurityJudgementKey;
-import org.mondo.collaboration.security.lens.context.keys.WhichModel;
-import org.mondo.collaboration.security.lens.context.manipulables.BaseKeyAwareManipulable;
-import org.mondo.collaboration.security.lens.context.manipulables.DebuggableManipulableWrapper;
-import org.mondo.collaboration.security.lens.context.manipulables.EObjectAttributeManipulator;
-import org.mondo.collaboration.security.lens.context.manipulables.EObjectManipulator;
-import org.mondo.collaboration.security.lens.context.manipulables.EObjectReferenceManipulator;
-import org.mondo.collaboration.security.lens.context.manipulables.ResourceManipulator;
-import org.mondo.collaboration.security.lens.context.manipulables.ResourceRootContentsManipulator;
-import org.mondo.collaboration.security.lens.emf.ModelFactInputKey;
-import org.mondo.collaboration.security.lens.emf.ModelIndexer;
-import org.mondo.collaboration.security.lens.util.ILiveRelation;
-import org.mondo.collaboration.security.lens.util.IManipulableRelation;
-import org.mondo.collaboration.security.lens.util.LiveTable;
 
 /**
  * Scope for the query engine driving the lens transformations.
  * 
- * <p> Equals and hashcode are not overridden - do not reinstantiate!
- * 
  * @author Bergmann Gabor
  *
  */
-public class MondoLensScope extends QueryScope {
+public abstract class MondoLensScope extends QueryScope {
 	
-	private SecurityArbiter arbiter;
-	private LockArbiter lockArbiter;
-	private ModelIndexer goldIndexer;
-	private ModelIndexer frontIndexer;
-	private Map<CorrespondenceKey, IIndexTable> correspondenceTables;
-
-
-	public MondoLensScope(SecurityArbiter arbiter, LockArbiter lockArbiter, ModelIndexer goldIndexer, ModelIndexer frontIndexer, Map<CorrespondenceKey, IIndexTable> correspondenceTables) {
-		this.arbiter = arbiter;
-		this.lockArbiter = lockArbiter;
-		this.goldIndexer = goldIndexer;
-		this.frontIndexer = frontIndexer;
-		this.correspondenceTables = correspondenceTables;
-	}
-	
-
-	@Override
-	protected IEngineContext createEngineContext(ViatraQueryEngine engine, IIndexingErrorListener errorListener, org.apache.log4j.Logger logger) {
-		return new MondoLensEngineContext(this, engine, errorListener, logger);
-	}
+//	private SecurityArbiter arbiter;
+//	private LockArbiter lockArbiter;
+//	private ModelIndexer goldIndexer;
+//	private ModelIndexer frontIndexer;
+//	private Map<CorrespondenceKey, IIndexTable> correspondenceTables;
+//
+//
+//	public MondoLensScope(SecurityArbiter arbiter, LockArbiter lockArbiter, ModelIndexer goldIndexer, ModelIndexer frontIndexer, Map<CorrespondenceKey, IIndexTable> correspondenceTables) {
+//		this.arbiter = arbiter;
+//		this.lockArbiter = lockArbiter;
+//		this.goldIndexer = goldIndexer;
+//		this.frontIndexer = frontIndexer;
+//		this.correspondenceTables = correspondenceTables;
+//	}
+//	
+//
+//	@Override
+//	protected IEngineContext createEngineContext(ViatraQueryEngine engine, IIndexingErrorListener errorListener, org.apache.log4j.Logger logger) {
+//		return new MondoLensEngineContext(this, engine, errorListener, logger);
+//	}
 
 
 //	@Override
@@ -120,115 +88,94 @@ public class MondoLensScope extends QueryScope {
 //	}
 
 
-	public SecurityArbiter getArbiter() {
-		return arbiter;
-	}
+//	public SecurityArbiter getArbiter() {
+//		return arbiter;
+//	}
+//
+//	public LockArbiter getLockArbiter() {
+//		return lockArbiter;
+//	}
+//
+//
+//	public ModelIndexer getGoldIndexer() {
+//		return goldIndexer;
+//	}
+//
+//
+//	public ModelIndexer getFrontIndexer() {
+//		return frontIndexer;
+//	}
+//
+//	
+//
+//	public Map<CorrespondenceKey, IIndexTable> getCorrespondenceTables() {
+//		return correspondenceTables;
+//	}
+//	
+//	
+//	private Map<IInputKey, ? extends IIndexTable> queriables;
+//	public Map<IInputKey, ? extends IIndexTable> getQueriables() {
+//		if (queriables == null) {
+//			queriables = 
+//					createQueriables(getArbiter(), getGoldIndexer(), getFrontIndexer(), getCorrespondenceTables());
+//		}
+//		return queriables;
+//	}
+//	private Map<IInputKey, ? extends IManipulableRelation> manipulables;
+//	public Map<IInputKey, ? extends IManipulableRelation> getManipulables() {
+//		if (manipulables == null) {
+//			manipulables = 
+//					createManipulables(getArbiter(), getGoldIndexer(), getFrontIndexer(), getCorrespondenceTables());
+//		}
+//		return manipulables;
+//	}
+////	
+//	private Map<IInputKey, ? extends IIndexTable> createQueriables(SecurityArbiter arbiter,
+//			ModelIndexer goldIndexer, ModelIndexer frontIndexer,
+//			Map<CorrespondenceKey, IIndexTable> correspondenceTables) 
+//	{
+//		Map<IInputKey, IIndexTable> liveRelations = new HashMap<IInputKey, IIndexTable>();
+//		
+//		liveRelations.putAll(correspondenceTables);
+//		
+//		for (ModelFactInputKey factInputKey : ModelFactInputKey.values()) {
+//            liveRelations.put(new CollabLensModelInputKey(factInputKey, WhichModel.GOLD), 
+//                    goldIndexer.getLiveIndexRelations().get(factInputKey));
+//            liveRelations.put(new CollabLensModelInputKey(factInputKey, WhichModel.FRONT), 
+//                    frontIndexer.getLiveIndexRelations().get(factInputKey));
+//        }
+//		
+//		for (Class<? extends Asset> assetClass : Asset.getKinds()) {
+//			for (OperationKind op : OperationKind.values()) {
+//				IIndexTable liveRelation = arbiter.getResultsAsLiveRelation(op, assetClass);
+//				final SecurityJudgementKey key = new SecurityJudgementKey(op, assetClass);
+//				liveRelations.put(key, liveRelation);
+//			}
+//		}		
+//		return liveRelations;
+//	}
+//	
+//	private Map<IInputKey, ? extends IManipulableRelation> createManipulables(SecurityArbiter arbiter,
+//			ModelIndexer goldIndexer, ModelIndexer frontIndexer,
+//			Map<CorrespondenceKey, LiveTable> correspondenceTables) 
+//	{
+//		Map<IInputKey, IManipulableRelation> manipulables = new HashMap<IInputKey, IManipulableRelation>();
+//		
+//		for (Entry<CorrespondenceKey, LiveTable> entry : correspondenceTables.entrySet()) {
+//			wrapForDebug(entry.getKey(), entry.getValue()).putInto(manipulables);
+//		}
+//		for (ModelFactInputKey modelFactKey : ModelFactInputKey.values()) {
+//            wrapForDebug(
+//                    new CollabLensModelInputKey(modelFactKey, WhichModel.GOLD), 
+//                    createManipulator(modelFactKey, goldIndexer)
+//            ).putInto(manipulables);
+//            wrapForDebug(
+//                    new CollabLensModelInputKey(modelFactKey, WhichModel.FRONT), 
+//                    createManipulator(modelFactKey, frontIndexer)
+//            ).putInto(manipulables);
+//        }
+//				
+//		return manipulables;
+//	}
 
-	public LockArbiter getLockArbiter() {
-		return lockArbiter;
-	}
-
-
-	public ModelIndexer getGoldIndexer() {
-		return goldIndexer;
-	}
-
-
-	public ModelIndexer getFrontIndexer() {
-		return frontIndexer;
-	}
-
-	
-
-	public Map<CorrespondenceKey, IIndexTable> getCorrespondenceTables() {
-		return correspondenceTables;
-	}
-	
-	
-	private Map<IInputKey, ? extends IIndexTable> queriables;
-	public Map<IInputKey, ? extends IIndexTable> getQueriables() {
-		if (queriables == null) {
-			queriables = 
-					createQueriables(getArbiter(), getGoldIndexer(), getFrontIndexer(), getCorrespondenceTables());
-		}
-		return queriables;
-	}
-	private Map<IInputKey, ? extends IManipulableRelation> manipulables;
-	public Map<IInputKey, ? extends IManipulableRelation> getManipulables() {
-		if (manipulables == null) {
-			manipulables = 
-					createManipulables(getArbiter(), getGoldIndexer(), getFrontIndexer(), getCorrespondenceTables());
-		}
-		return manipulables;
-	}
-	
-	private Map<IInputKey, ? extends IIndexTable> createQueriables(SecurityArbiter arbiter,
-			ModelIndexer goldIndexer, ModelIndexer frontIndexer,
-			Map<CorrespondenceKey, IIndexTable> correspondenceTables) 
-	{
-		Map<IInputKey, IIndexTable> liveRelations = new HashMap<IInputKey, IIndexTable>();
-		
-		liveRelations.putAll(correspondenceTables);
-		
-		for (ModelFactInputKey factInputKey : ModelFactInputKey.values()) {
-            liveRelations.put(new CollabLensModelInputKey(factInputKey, WhichModel.GOLD), 
-                    goldIndexer.getLiveIndexRelations().get(factInputKey));
-            liveRelations.put(new CollabLensModelInputKey(factInputKey, WhichModel.FRONT), 
-                    frontIndexer.getLiveIndexRelations().get(factInputKey));
-        }
-		
-		for (Class<? extends Asset> assetClass : Asset.getKinds()) {
-			for (OperationKind op : OperationKind.values()) {
-				IIndexTable liveRelation = arbiter.getResultsAsLiveRelation(op, assetClass);
-				final SecurityJudgementKey key = new SecurityJudgementKey(op, assetClass);
-				liveRelations.put(key, liveRelation);
-			}
-		}		
-		return liveRelations;
-	}
-	
-	private Map<IInputKey, ? extends IManipulableRelation> createManipulables(SecurityArbiter arbiter,
-			ModelIndexer goldIndexer, ModelIndexer frontIndexer,
-			Map<CorrespondenceKey, LiveTable> correspondenceTables) 
-	{
-		Map<IInputKey, IManipulableRelation> manipulables = new HashMap<IInputKey, IManipulableRelation>();
-		
-		for (Entry<CorrespondenceKey, LiveTable> entry : correspondenceTables.entrySet()) {
-			wrapForDebug(entry.getKey(), entry.getValue()).putInto(manipulables);
-		}
-		for (ModelFactInputKey modelFactKey : ModelFactInputKey.values()) {
-            wrapForDebug(
-                    new CollabLensModelInputKey(modelFactKey, WhichModel.GOLD), 
-                    createManipulator(modelFactKey, goldIndexer)
-            ).putInto(manipulables);
-            wrapForDebug(
-                    new CollabLensModelInputKey(modelFactKey, WhichModel.FRONT), 
-                    createManipulator(modelFactKey, frontIndexer)
-            ).putInto(manipulables);
-        }
-				
-		return manipulables;
-	}
-
-    private IManipulableRelation createManipulator(ModelFactInputKey modelFactKey, ModelIndexer model) {
-        switch(modelFactKey) {
-        case ATTRIBUTE_KEY:
-            return new EObjectAttributeManipulator(model);
-        case EOBJECT_KEY:
-            return new EObjectManipulator(model);
-        case REFERENCE_KEY:
-            return new EObjectReferenceManipulator(model);
-        case RESOURCE_KEY:
-            return new ResourceManipulator(model);
-        case RESOURCE_ROOT_CONTENTS_KEY:
-            return new ResourceRootContentsManipulator(model);
-        default:
-            throw new IllegalArgumentException();
-        }
-    }
-
-
-    private static BaseKeyAwareManipulable wrapForDebug(IInputKey key, IManipulableRelation wrapped) {
-		return new DebuggableManipulableWrapper(wrapped, key);
-	}
 }
